@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
 import 'package:permission_handler/permission_handler.dart' as permission;
 
 /*Future<bool> serviceEnabled() async {
@@ -84,14 +82,3 @@ Future<bool> cameraPermission() async {
 
 
 
-void showSnackbar(String message) {
-  if (Get.context != null) {
-    Get.snackbar(
-      'Title',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  } else {
-    print("Snackbar context is null");
-  }
-}

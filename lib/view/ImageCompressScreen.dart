@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:img_compre_s/utils.dart';
 
 import '../controller/ImageController.dart';
 
@@ -40,12 +39,11 @@ class _ImagePickScreenState extends State<ImagePickScreen> {
 
   @override
   Widget build(BuildContext context) {
-    storagePermission();
-
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text("Pick and Compress Image"),
+        title:
+            const Text("Compress Image", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
         centerTitle: true,
@@ -55,6 +53,7 @@ class _ImagePickScreenState extends State<ImagePickScreen> {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildSectionHeader("Selected Image"),
               const SizedBox(height: 10),

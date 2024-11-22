@@ -1,11 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
-import 'package:img_compre_s/utils.dart';
 import 'package:path_provider/path_provider.dart'; // For file path
 
 class ImageController extends GetxController {
@@ -44,7 +43,6 @@ class ImageController extends GetxController {
     }
   }
 
-
   Future<void> compressImageRealTime({required int quality}) async {
     if (selectedImage.value != null) {
       try {
@@ -79,14 +77,12 @@ class ImageController extends GetxController {
 
       final file = selectedImage.value!;
 
-      final result = await FlutterImageCompress.compressWithFile(
-        file.path,
-        minWidth: 800,
-        minHeight: 800,
-        quality: 80,
-        rotate: 0,
-        format: CompressFormat.jpeg
-      );
+      final result = await FlutterImageCompress.compressWithFile(file.path,
+          minWidth: 800,
+          minHeight: 800,
+          quality: 80,
+          rotate: 0,
+          format: CompressFormat.jpeg);
 
       if (result == null) {
         Get.snackbar('Error', 'Failed to compress image');
@@ -100,12 +96,14 @@ class ImageController extends GetxController {
       imageSize.value =
           "Compressed Size: ${(compressedSize / 1024).toStringAsFixed(2)} KB";
 
-      Get.snackbar('Success', 'Image compressed successfully',snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Success', 'Image compressed successfully',
+          snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
       Get.snackbar('Error', 'An error occurred: $e');
     }
   }
 
+/*
   // Function to save the compressed image
   Future<void> saveCompressedImage(File file) async {
     try {
@@ -116,24 +114,88 @@ class ImageController extends GetxController {
 
       // Save the compressed file
       await file.copy(savePath);
-      showSnackbar('s');
-     // Get.snackbar('Success', 'Image saved at $savePath');
+      Get.snackbar('Success', 'Image saved at $savePath');
     } catch (e) {
       Get.snackbar('Error', 'Failed to save image: $e');
     }
   }
+*/
 
+  Future<void> saveCompressedImage(File file) async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
 
+      String savePath;
 
+      if (Platform.isAndroid) {
+        final directory = await getExternalStorageDirectory();
+        if (directory == null) {
+          throw Exception('External storage directory not available.');
+        }
+
+        // For Android 10+ or below, use proper folder creation
+        final folderPath = '${directory.path}/CompressedImages';
+        final folder = Directory(folderPath);
+        if (!await folder.exists()) {
+          await folder.create(recursive: true);
+        }
+
+        savePath =
+            '$folderPath/compressed_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        savePath =
+            '${directory.path}/compressed_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      }
+
+      if (!file.existsSync()) {
+        throw Exception('Source file does not exist.');
+      }
+
+      final savedFile = await file.copy(savePath);
+
+      Get.snackbar(
+        'Success',
+        'Image saved successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      print('Image saved at: ${savedFile.path}');
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to save image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      print('Failed to save image: $e');
+    }
+  }
+
+  // Helper function to check if the Android version is 10 or above
+  Future<bool> isAndroid10OrAbove() async {
+    if (Platform.isAndroid) {
+      final version = int.parse(Platform.operatingSystemVersion.split(' ')[1]);
+      return version >= 29; // Android 10 corresponds to API level 29
+    }
+    return false;
+  }
 
   // Load and process the selected image
 
   // Update the preview image based on quality
   Future<void> updatePreview() async {
     if (selectedImage.value != null) {
-      final originalImage = img.decodeImage(selectedImage.value!.readAsBytesSync());
+      final originalImage =
+          img.decodeImage(selectedImage.value!.readAsBytesSync());
       if (originalImage != null) {
-        final compressedImage = img.encodeJpg(originalImage, quality: quality.value);
+        final compressedImage =
+            img.encodeJpg(originalImage, quality: quality.value);
         final previewFile = File("${selectedImage.value!.path}_preview.jpg")
           ..writeAsBytesSync(compressedImage);
         previewImage.value = previewFile;
@@ -147,5 +209,3 @@ class ImageController extends GetxController {
     updatePreview();
   }
 }
-
-
