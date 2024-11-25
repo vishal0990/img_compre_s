@@ -80,5 +80,12 @@ Future<bool> cameraPermission() async {
   return false;
 }
 
-
-
+String getFileSize(int bytes) {
+  if (bytes < 1024) {
+    return '$bytes B'; // Bytes
+  } else if (bytes < 1024 * 1024) {
+    return '${(bytes / 1024).toStringAsFixed(2)} KB'; // Kilobytes
+  } else {
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB'; // Megabytes
+  }
+}

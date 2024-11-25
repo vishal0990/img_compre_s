@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 
 import '../controller/ImageController.dart';
 
@@ -42,7 +43,7 @@ class _ImagePickScreenState extends State<ImagePickScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title:
+        title:   
             const Text("Compress Image", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
@@ -66,30 +67,163 @@ class _ImagePickScreenState extends State<ImagePickScreen> {
                         ),
                       )
                     : controller.selectedImage.value != null
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  controller.selectedImage.value!,
-                                  width: 250,
-                                  height: 250,
-                                  fit: BoxFit.cover,
+                        ? SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Display original and compressed images side by side
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Original Image
+                                    Column(
+                                      children: [
+                                        const Text(
+                                          "Original",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Image.file(
+                                            controller.selectedImage.value!,
+                                            width: 150,
+                                            height: 150,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Text(
+                                          "Size: ${controller.compressedImageSize.value}",
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 20),
+                                    const Divider(),
+                                    // Compressed Image
+                                    Column(
+                                      children: [
+                                        const Text(
+                                          "Compressed",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        controller.isCompressing.value
+                                            ? const SizedBox(
+                                                width: 150,
+                                                height: 150,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              )
+                                            : GestureDetector(
+                                                onTap: () {
+                                                  if (controller.compressedImage
+                                                          .value !=
+                                                      null) {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Scaffold(
+                                                          backgroundColor:
+                                                              Colors.white,
+                                                          body: Center(
+                                                            child: PhotoView(
+                                                              imageProvider:
+                                                                  FileImage(controller
+                                                                      .compressedImage
+                                                                      .value!),
+                                                              backgroundDecoration:
+                                                                  const BoxDecoration(
+                                                                      color: Colors
+                                                                          .black),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                },
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  child: controller
+                                                              .compressedImage
+                                                              .value !=
+                                                          null
+                                                      ? Image.file(
+                                                          controller
+                                                              .compressedImage
+                                                              .value!,
+                                                          width: 150,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : const Text(
+                                                          "No Preview",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color:
+                                                                Colors.black45,
+                                                          ),
+                                                        ),
+                                                ),
+                                              ),
+                                        const SizedBox(height: 10),
+                                        Text(
+                                          controller.imageSize.value,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                "Size: ${controller.imageSize.value}",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black54,
+                                const SizedBox(height: 20),
+
+                                // Quality Slider
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text("Quality: "),
+                                    Expanded(
+                                      child: Slider(
+                                        value: controller
+                                            .compressionQuality.value
+                                            .toDouble(),
+                                        min: 1,
+                                        max: 100,
+                                        divisions: 99,
+                                        label:
+                                            "${controller.compressionQuality.value}%",
+                                        onChanged: (value) {
+                                          print(
+                                              double.tryParse(value.toString())!
+                                                  .toInt());
+                                          controller.updateCompressionQuality(
+                                              double.tryParse(value.toString())!
+                                                  .toInt());
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 20),
-                              _buildQualitySlider(),
-                              const SizedBox(height: 20),
-                            ],
+                              ],
+                            ),
                           )
                         : const Text(
                             "No image selected",
